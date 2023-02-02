@@ -14,9 +14,10 @@ const Button: FC<ButtonProps> = ({ text, onClick }) => {
 
     return (
         <button
-            className={style}
+            className={`py-2 px-4 rounded ${style}`}
             onClick={onClick}
             onMouseOver={() => setStyle("bg-slate-500 text-white")}
+            onMouseLeave={() => setStyle("bg-white text-slate-500")}
         >
             {text}
         </button>
