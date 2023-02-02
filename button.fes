@@ -1,0 +1,10 @@
+[r]button(text)
+    style: "border"
+    ::default
+        style: "text-slate-50 bg-white"
+        ->onHover = @@button::hover
+    ::hover
+        style: "bg-slate-50 text-white"
+        ->onMouseExit = @@button::default
+    ::all
+        ->onClick(console.log("test"))
