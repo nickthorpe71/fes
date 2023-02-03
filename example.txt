@@ -26,6 +26,7 @@ Elements:
         [r] = reusable 
         [s] = specific
     @@ = visual component reference
+    () = componentData
 - state
     :: = state definition
 - behavior
