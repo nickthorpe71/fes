@@ -4,6 +4,7 @@
 
 -   define component structure
 -   differentiate reusable and specific components
+-   any descriptions should be able to be substituted with a prompt
 -   define abstract state
 -   prevent "bad states" ex. being in an error and success state at the same time
 -   understand the scope of states and where they might be tracked in the application
@@ -19,10 +20,12 @@
         {} = logic component definition
             {r} = reusable
             {s} = specific
+            {g} = global
         $$ = logic component reference
         [] = visual component definition
             [r] = reusable
             [s] = specific
+            [g] = global
         @@ = visual component reference
         () = componentData
             (API) = api call to get data
@@ -59,3 +62,23 @@ This symbol specifies that the data is coming from an api call. If a fes loading
 -   react
 -   tailwind
 -   lodash
+
+### Prompt Substitution
+
+instead of wiring:
+
+```scss
+scss: {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+```
+
+you can write:
+
+```
+prompt: a scss class that centers the elements
+```

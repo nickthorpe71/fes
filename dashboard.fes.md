@@ -1,15 +1,39 @@
 ```ts
 Existing: {
-    [r]cardHeader(text: string, tooltipText: string): "components/card/CardHeader"
-    [r]baseCard: "components/card/BaseCard"
+    [g]cardHeader(text: string, tooltipText: string): "components/card/CardHeader"
+    [g]baseCard: "components/card/BaseCard"
 }
 
 ToCreateFromExisting: {
     [s]practiceHistoryTable
-    [r]title(text: string, size: small | medium | large)
-    [r]metricByDataChart(data)
-    [r]sortableTable(data)
+    [g]title(text: string, size: small | medium | large)
+    [g]metricByDataChart(data)
+    [g]sortableTable(data)
 }
+
+[g]cardLoading
+    scss: {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    // loading spinner should scale to the size of the card
+    @@loadingSpinner
+
+[g]cardErrorReload(onReload: () => void)
+    scss: {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    []("Error")
+    []button
+        []("Reload")
+            ->onClick = onReload()
 
 [r]dashboardStat(title: string, count: number, measurement: string)
     @@title(title, small)
@@ -18,6 +42,13 @@ ToCreateFromExisting: {
             style: "text-xl"
         [s](measurement)
             style: "text-sm"
+    ::loading
+        increment numbers when loaded
+    ::error
+        "error"
+        []button
+            "reload"
+    ::stay at 0
 
 [s]recentMeetingsCard
     (API)tableData {
@@ -35,12 +66,16 @@ ToCreateFromExisting: {
     ::all
         @@baseCard
             @@cardHeader(title: "Recent Meetings", tooltipText: "Your most recent meeting reports")
+        ->hasError = @@self::error
     ::default
         @@sortableTable(tableData)
         ->isLoading = @@self::loading
     ::loading
-        @@loadingSpinner
+        @@cardLoading
         ->!isLoading = @@self::default
+    ::error
+        @@cardError
+        ->!hasError = @@self::default
 
 [s]skillSummaryCard
     // needs to do an api call to get skill summary data
@@ -58,15 +93,31 @@ ToCreateFromExisting: {
     ::all
         @@baseCard
             @@cardHeader(title: "Skill Summary", tooltipText: "Summary of your performance metrics from your practice sessions")
+        ->hasError = @@self::error
     ::default
         @@metricByDataChart
+        ->isLoading = @@self::loading
     ::loading
-        @@loadingSpinner
+        @@cardLoading
+        ->!isLoading = @@self::default
+    ::error
+        @@cardError
+        ->!hasError = @@self::default
 
 [s]practiceHistoryCard
-    @@baseCard
-        @@cardHeader(title: "Practice History", tooltipText: "Your reports from previous practice recordings")
+    ::all
+        @@baseCard
+            @@cardHeader(title: "Practice History", tooltipText: "Your reports from previous practice recordings")
+        ->hasError = @@self::error
+    ::default
         @@practiceHistoryTable
+        ->isLoading = @@self::loading
+    ::loading
+        @@cardLoading
+        ->!isLoading = @@self::default
+    ::error
+        @@cardError
+        ->!hasError = @@self::default
 
 [s]meetingsSummaryDisplay
     (API)
@@ -97,11 +148,11 @@ ToCreateFromExisting: {
 
 
 [s]dashboard
-    @@title("Learning", large)
+    @@title("Meetings", large)
     @@meetingsSummaryDisplay
     @@recentMeetingsCard
 
-    @@title("Meetings", large)
+    @@title("Learning", large)
     @@learningSummaryDisplay
     @@skillSummaryCard
 
