@@ -101,3 +101,5 @@ const myFunction = (cProgramOutput) => {
     console.log("output:", cProgramOutput);
 };
 ```
+
+**note:** This is blocking so if it needs to be run async look up const `{ spawn } = require("child_process");`
