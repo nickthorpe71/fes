@@ -129,7 +129,10 @@ ToCreateFromExisting: {
             @@dashboardStat("Total Meetings", totalMeetings, "meetings")
             @@dashboardStat("Today's Meetings", todaysMeetings, "meetings")
     ::loading
-        @@loadingSpinner
+    ::error
+        totalMeetings = 0;
+        todaysMeetings = 0;
+
 
 
 [s]learningSummaryDisplay
@@ -144,8 +147,10 @@ ToCreateFromExisting: {
             @@dashboardStat("Total Learning Time", totalLearningTime, "min")
             @@dashboardStat("Assigned Courses", assignedCourses, "courses")
     ::loading
-        @@loadingSpinner
-
+    ::error
+        completedCourses = 0;
+        totalLearningTime = 0;
+        assignedCourses = 0;
 
 [s]dashboard
     @@title("Meetings", large)

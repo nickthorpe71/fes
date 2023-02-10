@@ -1,4 +1,4 @@
-[r]button(text: string, onClick: () => void)
+[r]button1(text: string, onClick: () => void)
     ::default
         style: "bg-white text-slate-500"
         ->onMouseOver = @@self::hover
@@ -14,12 +14,10 @@
     ::default
         @@button("hover me")
         ->onMouseOver = @@self::hover
-    ::hover 
+    ::hover
         @@button("hovering", () => throw("error"))
         ->onMouseLeave = @@self::default
     ::error
         [s](This button is broken, please refresh.)
             ::default
                 style: "text-red-400"
-
-
