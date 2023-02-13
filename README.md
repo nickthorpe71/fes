@@ -1,4 +1,4 @@
-# Fes - Front End Specification Language
+# FAST - Frontend Automated Scaffolding Tool
 
 ### Goals
 

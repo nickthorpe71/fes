@@ -13,10 +13,10 @@
 
 [s]buttonWithEvent
     ::default
-        @@button("hover me")
+        @@button1("hover me")
         ->onMouseOver = @@self::hover
     ::hover
-        @@button("hovering", () => throw("error"))
+        @@button1("hovering", () => throw("error"))
         ->onMouseLeave = @@self::default
     ::error
         [s](This button is broken, please refresh.)
