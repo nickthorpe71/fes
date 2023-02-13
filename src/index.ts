@@ -35,10 +35,12 @@ const exampleFile = `
         ->onMouseLeave = @@self::default
     ::all
         style: "py-2 px-4 rounded"
-        ->onClick(onClick)
-        [s](text)
+        ->onClick = onClick
+        [s]()
+            ::default
+                text
 
-[s]buttonWithEvent
+[s]buttonWithEvent()
     ::default
         @@button1("hover me")
         ->onMouseOver = @@self::hover
@@ -46,17 +48,27 @@ const exampleFile = `
         @@button1("hovering", () => throw("error"))
         ->onMouseLeave = @@self::default
     ::error
-        [s](This button is broken, please refresh.)
+        [s]()
             ::default
                 style: "text-red-400"
+                "This button is broken, please refresh."
 `;
 
 interface ComponentDeclaration {
     isGlobal: boolean;
     name: string;
-    arguments: Argument[];
+    arguments: Parameter[];
     data: ComponentData[];
     states: State[];
+}
+
+interface ComponentReference {
+    name: string;
+    arguments: string[];
+}
+
+interface RawComponent {
+    content: string;
 }
 
 interface ComponentData {
@@ -64,12 +76,7 @@ interface ComponentData {
     children: string[];
 }
 
-interface ComponentReference {
-    name: string;
-    arguments: Argument[];
-}
-
-interface Argument {
+interface Parameter {
     type: string;
     name: string;
 }
@@ -79,7 +86,7 @@ interface State {
     name: string;
     style: string;
     behaviors: Behavior[];
-    children: ComponentDeclaration | ComponentReference[];
+    children: Array<ComponentDeclaration | ComponentReference | RawComponent>;
 }
 
 interface Behavior {
@@ -98,7 +105,7 @@ const extractComponentDeclaration = (
     return {
         isGlobal: extractComponentGlobalStatus(componentSignature),
         name: extractComponentName(componentSignature),
-        arguments: extractArguments(componentSignature),
+        arguments: extractParameters(componentSignature),
         states: extractStates(roughNode.children),
         data: extractComponentData(roughNode.children),
     };
@@ -125,6 +132,7 @@ const extractStates = (potentialStates: RoughNode[]): State[] => {
     const states = potentialStates.filter((node) =>
         node.content.startsWith("::")
     );
+
     return states.map((state) => {
         const stateSignature = state.content;
         const stateName = extractStateName(stateSignature);
@@ -150,9 +158,11 @@ const extractStateName = (stateSignature: string): string => {
 };
 
 const extractStateType = (stateName: string): State["type"] => {
-    if (stateName === "all") return "all";
-    if (stateName === "error") return "error";
-    if (stateName === "loading") return "loading";
+    // these states have some additional functionality
+    // or special handling when they are parsed back into code
+    const definedStates = ["default", "all", "error", "loading"];
+    if (definedStates.includes(stateName)) return stateName as State["type"];
+
     return "custom-state";
 };
 
@@ -171,10 +181,8 @@ const extractStateBehaviors = (potentialBehaviors: RoughNode[]): Behavior[] => {
     );
 
     return behaviorNodes.map((behaviorNode) => {
-        const behaviorSignature = behaviorNode.content.slice(2).trim();
-        const behaviorComponents = behaviorSignature.split("=");
-        const behaviorType = extractBehaviorType(behaviorComponents[0]);
-        const behaviorTarget = extractBehaviorTarget(behaviorComponents[1]);
+        const behaviorType = extractBehaviorType(behaviorNode.content);
+        const behaviorTarget = extractBehaviorTarget(behaviorNode.content);
         return {
             type: behaviorType,
             ...behaviorTarget,
@@ -184,12 +192,19 @@ const extractStateBehaviors = (potentialBehaviors: RoughNode[]): Behavior[] => {
 
 const extractStateChildComponents = (
     potentialChildren: RoughNode[]
-): ComponentDeclaration | ComponentReference[] => {
+): Array<ComponentDeclaration | ComponentReference | RawComponent> => {
     const declarations = potentialChildren.filter((node) =>
         node.content.startsWith("[")
     );
     const references = potentialChildren.filter((node) =>
         node.content.startsWith("@@")
+    );
+    const rawComponents = potentialChildren.filter(
+        (node) =>
+            !node.content.includes("style:") &&
+            !node.content.includes("->") &&
+            !node.content.startsWith("[") &&
+            !node.content.startsWith("@@")
     );
 
     return [
@@ -197,42 +212,49 @@ const extractStateChildComponents = (
             extractComponentDeclaration(declaration)
         ),
         ...references.map((reference) => extractComponentReference(reference)),
+        ...rawComponents.map((rawComponent) => ({
+            content: rawComponent.content,
+        })),
     ];
 };
 
 // behavior
 const extractBehaviorType = (behaviorSignature: string): Behavior["type"] => {
-    if (behaviorSignature.startsWith("onMouseOver")) return "onMouseOver";
-    if (behaviorSignature.startsWith("onMouseLeave")) return "onMouseLeave";
-    if (behaviorSignature.startsWith("onClick")) return "onClick";
-    throw new Error("Invalid behavior type");
+    const behaviorType = behaviorSignature.slice(2).split("=")[0].trim();
+    const validBehaviorTypes = ["onMouseOver", "onMouseLeave", "onClick"];
+
+    if (!validBehaviorTypes.includes(behaviorType))
+        throw new Error("Invalid behavior type");
+
+    return behaviorType as Behavior["type"];
 };
 
 const extractBehaviorTarget = (
     behaviorSignature: string
 ): { targetComponent?: string; targetState?: string; function?: string } => {
-    if (behaviorSignature.startsWith("@@")) {
-        const targetComponents = behaviorSignature.slice(2).split("::");
+    const behavior = behaviorSignature.split("=")[1].trim();
+
+    if (behavior.startsWith("@@")) {
+        const targetComponents = behavior.slice(2).split("::");
         return {
             targetComponent: targetComponents[0],
             targetState: targetComponents[1],
         };
-    } else if (behaviorSignature.startsWith("() =>")) {
-        return {
-            function: behaviorSignature.slice(5).trim(),
-        };
     } else {
-        throw new Error("Invalid behavior target");
+        return {
+            function: behavior,
+        };
     }
 };
 
 // general
-function extractArguments(text: string): Argument[] {
+const extractParameters = (text: string): Parameter[] => {
     if (!text.includes("(")) return [];
     const argumentString = text.slice(
         text.indexOf("(") + 1,
         text.lastIndexOf(")")
     );
+    if (argumentString === "") return [];
 
     return argumentString.split(",").map((arg: string) => {
         const argumentComponents = arg.trim().split(":");
@@ -241,7 +263,19 @@ function extractArguments(text: string): Argument[] {
             type: argumentComponents[1].trim(),
         };
     });
-}
+};
+
+const extractArguments = (text: string): string[] => {
+    if (!text.includes("(")) return [];
+    const argumentString = text.slice(
+        text.indexOf("(") + 1,
+        text.lastIndexOf(")")
+    );
+    if (argumentString === "") return [];
+
+    return argumentString.split(",").map((arg: string) => arg.trim());
+};
+
 const getIndentLevel = (line: string): number => {
     let indent = 0;
     for (let i = 0; i < line.length; i++) {
@@ -324,7 +358,7 @@ const main = () => {
     const roughTree = extractRoughTree(exampleFile);
     const fesAST = extractFesAST(roughTree);
 
-    console.log(fesAST);
+    console.log(JSON.stringify(fesAST, null, 2));
 };
 
 main();

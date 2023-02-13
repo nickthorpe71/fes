@@ -1,3 +1,4 @@
+```ts
 [r]button1(text: string, onClick: () => void)
     ::default
         style: "bg-white text-slate-500"
@@ -21,3 +22,4 @@
         [s](This button is broken, please refresh.)
             ::default
                 style: "text-red-400"
+```
