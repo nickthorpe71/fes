@@ -1,0 +1,116 @@
+[
+    {
+        "isGlobal": true,
+        "name": "button1",
+        "arguments": [
+            {
+                "name": "text",
+                "type": "string"
+            },
+            {
+                "name": "onClick?",
+                "type": "() => void"
+            }
+        ],
+        "states": [
+            {
+                "type": "default",
+                "name": "default",
+                "style": "\"bg-white text-slate-500\"",
+                "behaviors": [
+                    {
+                        "type": "onMouseOver",
+                        "targetComponent": "self",
+                        "targetState": "hover"
+                    }
+                ],
+                "children": []
+            },
+            {
+                "type": "custom-state",
+                "name": "hover",
+                "style": "\"bg-slate-500 text-white\"",
+                "behaviors": [
+                    {
+                        "type": "onMouseLeave",
+                        "targetComponent": "self",
+                        "targetState": "default"
+                    }
+                ],
+                "children": []
+            },
+            {
+                "type": "all",
+                "name": "all",
+                "style": "\"py-2 px-4 rounded\"",
+                "behaviors": [
+                    {
+                        "type": "onClick",
+                        "function": "onClick"
+                    }
+                ],
+                "children": [
+                    {
+                        "content": "text"
+                    }
+                ]
+            }
+        ],
+        "data": []
+    },
+    {
+        "isGlobal": false,
+        "name": "buttonWithEvent",
+        "arguments": [],
+        "states": [
+            {
+                "type": "default",
+                "name": "default",
+                "style": "",
+                "behaviors": [
+                    {
+                        "type": "onMouseOver",
+                        "targetComponent": "self",
+                        "targetState": "hover"
+                    }
+                ],
+                "children": [
+                    {
+                        "name": "utton1",
+                        "arguments": ["\"hover me\""]
+                    }
+                ]
+            },
+            {
+                "type": "custom-state",
+                "name": "hover",
+                "style": "",
+                "behaviors": [
+                    {
+                        "type": "onMouseLeave",
+                        "targetComponent": "self",
+                        "targetState": "default"
+                    }
+                ],
+                "children": [
+                    {
+                        "name": "utton1",
+                        "arguments": ["\"hovering\"", "() => throw(\"error\")"]
+                    }
+                ]
+            },
+            {
+                "type": "error",
+                "name": "error",
+                "style": "\"text-red-400\"",
+                "behaviors": [],
+                "children": [
+                    {
+                        "content": "\"This button is broken, please refresh.\""
+                    }
+                ]
+            }
+        ],
+        "data": []
+    }
+]
