@@ -1,4 +1,4 @@
-[r]button1(text: string, onClick?: () => void)
+[r]Button1(text: string, onClick?: () => void)
     ::default
         style: "bg-white text-slate-500"
         ->onMouseOver = @@self::hover
@@ -10,7 +10,7 @@
         ->onClick = onClick
         text
 
-[s]buttonWithEvent()
+[s]ButtonWithEvent()
     ::default
         @@button1("hover me")
         ->onMouseOver = @@self::hover

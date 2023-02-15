@@ -22,6 +22,7 @@ export const extractComponentDeclaration = (
     const componentSignature = roughNode.content;
 
     return {
+        nodeType: "component-declaration",
         isGlobal: extractComponentGlobalStatus(componentSignature),
         name: extractComponentName(componentSignature),
         arguments: extractParameters(componentSignature),
@@ -36,6 +37,7 @@ export const extractComponentReference = (
     const componentSignature = roughNode.content;
 
     return {
+        nodeType: "component-reference",
         name: extractComponentName(componentSignature),
         arguments: extractArguments(componentSignature),
     };
@@ -58,6 +60,7 @@ export const extractStates = (potentialStates: RoughNode[]): State[] => {
         const stateName = extractStateName(stateSignature);
         const stateType = extractStateType(stateName);
         return {
+            nodeType: "state",
             type: stateType,
             name: stateName,
             style: extractStateStyle(state.children),

@@ -1,4 +1,10 @@
-import { Parameter, RoughNode } from "./types";
+import {
+    Parameter,
+    RoughNode,
+    ComponentDeclaration,
+    File,
+    NewLineMap,
+} from "./types";
 
 import { extractComponentDeclaration } from "./component";
 
@@ -40,7 +46,7 @@ export const getIndentLevel = (line: string): number => {
     return indent;
 };
 
-export const extractRoughTree = (text: string) => {
+export const extractRoughTree = (text: string): RoughNode[] => {
     const lines: string[] = text.split("\n").filter((line) => line.trim());
     const levelSet: number[] = [
         ...lines.reduce(
@@ -78,11 +84,55 @@ export const extractRoughTree = (text: string) => {
     return tree;
 };
 
-export const extractFesAST = (roughTree: RoughNode[]) => {
-    const fesAST = roughTree.map((node) => {
-        if (node.content.startsWith("[")) {
-            return extractComponentDeclaration(node);
-        }
-    });
+export const extractFesAST = (
+    roughTree: RoughNode[]
+): ComponentDeclaration[] => {
+    const fesAST = roughTree.map((node: RoughNode) =>
+        extractComponentDeclaration(node)
+    );
     return fesAST;
+};
+
+export const generateFilesFromFesAST = (
+    fesAST: ComponentDeclaration[]
+): File[] => {
+    const files: File[] = fesAST.map((node: ComponentDeclaration) => ({
+        name: node.name + ".tsx",
+        content: "",
+    }));
+
+    const filesWithImports: File[] = appendNewLines(
+        files,
+        gatherImports(files)
+    );
+
+    //  - determine the props type interface and any other interfaces it needs
+    //  - determine the component function signature
+    //  - determine the component function body
+    //    - determine states
+    //      - all specified states (error, loading, etc.)
+    //  - component function return
+    //    - construct jsx
+    //      - add jsx for specifies states (error, loading, etc.)
+    //  - component export default
+
+    return filesWithImports;
+};
+
+const appendNewLines = (files: File[], newLineMap: NewLineMap): File[] => {
+    return files.map((file: File) => ({
+        ...file,
+        content: (file.content =
+            file.content + newLineMap[file.name].join("\r") + "\r"),
+    }));
+};
+
+const gatherImports = (files: File[]): NewLineMap => {
+    const defaultImports =
+        "import React, {FC, useState, useRef, useEffect} from 'react';";
+
+    return files.reduce((acc, file) => {
+        acc[file.name] = [defaultImports];
+        return acc;
+    }, {} as NewLineMap);
 };

@@ -1,7 +1,8 @@
 [
     {
+        "nodeType": "component-declaration",
         "isGlobal": true,
-        "name": "button1",
+        "name": "Button1",
         "arguments": [
             {
                 "name": "text",
@@ -14,11 +15,13 @@
         ],
         "states": [
             {
+                "nodeType": "state",
                 "type": "default",
                 "name": "default",
                 "style": "\"bg-white text-slate-500\"",
                 "behaviors": [
                     {
+                        "nodeType": "behavior",
                         "type": "onMouseOver",
                         "targetComponent": "self",
                         "targetState": "hover"
@@ -27,11 +30,13 @@
                 "children": []
             },
             {
+                "nodeType": "state",
                 "type": "custom-state",
                 "name": "hover",
                 "style": "\"bg-slate-500 text-white\"",
                 "behaviors": [
                     {
+                        "nodeType": "behavior",
                         "type": "onMouseLeave",
                         "targetComponent": "self",
                         "targetState": "default"
@@ -40,17 +45,20 @@
                 "children": []
             },
             {
+                "nodeType": "state",
                 "type": "all",
                 "name": "all",
                 "style": "\"py-2 px-4 rounded\"",
                 "behaviors": [
                     {
+                        "nodeType": "behavior",
                         "type": "onClick",
                         "function": "onClick"
                     }
                 ],
                 "children": [
                     {
+                        "nodeType": "raw-component",
                         "content": "text"
                     }
                 ]
@@ -59,16 +67,19 @@
         "data": []
     },
     {
+        "nodeType": "component-declaration",
         "isGlobal": false,
-        "name": "buttonWithEvent",
+        "name": "ButtonWithEvent",
         "arguments": [],
         "states": [
             {
+                "nodeType": "state",
                 "type": "default",
                 "name": "default",
                 "style": "",
                 "behaviors": [
                     {
+                        "nodeType": "behavior",
                         "type": "onMouseOver",
                         "targetComponent": "self",
                         "targetState": "hover"
@@ -76,17 +87,22 @@
                 ],
                 "children": [
                     {
+                        "nodeType": "component-reference",
                         "name": "utton1",
-                        "arguments": ["\"hover me\""]
+                        "arguments": [
+                            "\"hover me\""
+                        ]
                     }
                 ]
             },
             {
+                "nodeType": "state",
                 "type": "custom-state",
                 "name": "hover",
                 "style": "",
                 "behaviors": [
                     {
+                        "nodeType": "behavior",
                         "type": "onMouseLeave",
                         "targetComponent": "self",
                         "targetState": "default"
@@ -94,18 +110,24 @@
                 ],
                 "children": [
                     {
+                        "nodeType": "component-reference",
                         "name": "utton1",
-                        "arguments": ["\"hovering\"", "() => throw(\"error\")"]
+                        "arguments": [
+                            "\"hovering\"",
+                            "() => throw(\"error\")"
+                        ]
                     }
                 ]
             },
             {
+                "nodeType": "state",
                 "type": "error",
                 "name": "error",
                 "style": "\"text-red-400\"",
                 "behaviors": [],
                 "children": [
                     {
+                        "nodeType": "raw-component",
                         "content": "\"This button is broken, please refresh.\""
                     }
                 ]

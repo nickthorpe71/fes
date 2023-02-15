@@ -48,6 +48,7 @@ export const extractStateBehaviors = (
         const behaviorType = extractBehaviorType(behaviorNode.content);
         const behaviorTarget = extractBehaviorTarget(behaviorNode.content);
         return {
+            nodeType: "behavior",
             type: behaviorType,
             ...behaviorTarget,
         };
@@ -77,6 +78,7 @@ export const extractStateChildComponents = (
         ),
         ...references.map((reference) => extractComponentReference(reference)),
         ...rawComponents.map((rawComponent) => ({
+            nodeType: "raw-component" as const,
             content: rawComponent.content,
         })),
     ];

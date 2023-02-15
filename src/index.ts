@@ -1,5 +1,12 @@
 import fs from "fs";
-import { extractRoughTree, extractFesAST } from "./parsing";
+
+import { RoughNode, ComponentDeclaration } from "./types";
+
+import {
+    extractRoughTree,
+    extractFesAST,
+    generateFilesFromFesAST,
+} from "./parsing";
 
 const main = () => {
     const source = "button.fes";
@@ -7,16 +14,17 @@ const main = () => {
     fs.readFile(source, "utf-8", (err, data) => {
         if (err) throw err;
 
-        const roughTree = extractRoughTree(data);
-        const fesAST = extractFesAST(roughTree);
+        const roughTree: RoughNode[] = extractRoughTree(data);
+        const fesAST: ComponentDeclaration[] = extractFesAST(roughTree);
+        const newFiles: {
+            name: string;
+            content: string;
+        }[] = generateFilesFromFesAST(fesAST);
 
-        const output = JSON.stringify(fesAST, null, 4);
-
-        console.log(output);
-
-        fs.writeFile("output.txt", output, (err) => {
-            if (err) throw err;
-            console.log("The file has been saved!");
+        newFiles.forEach((file) => {
+            fs.writeFile(file.name, file.content, (err) => {
+                if (err) throw err;
+            });
         });
     });
 };
