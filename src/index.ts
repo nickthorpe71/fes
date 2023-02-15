@@ -1,6 +1,6 @@
-import fs from "fs";
+import * as fs from "fs";
 
-import { RoughNode, ComponentDeclaration } from "./types";
+import { RoughNode, ComponentDeclaration, File } from "./types";
 
 import {
     extractRoughTree,
@@ -16,10 +16,7 @@ const main = () => {
 
         const roughTree: RoughNode[] = extractRoughTree(data);
         const fesAST: ComponentDeclaration[] = extractFesAST(roughTree);
-        const newFiles: {
-            name: string;
-            content: string;
-        }[] = generateFilesFromFesAST(fesAST);
+        const newFiles: File[] = generateFilesFromFesAST(fesAST);
 
         newFiles.forEach((file) => {
             fs.writeFile(file.name, file.content, (err) => {

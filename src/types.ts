@@ -2,7 +2,7 @@ export interface ComponentDeclaration {
     nodeType: "component-declaration";
     isGlobal: boolean;
     name: string;
-    arguments: Parameter[];
+    parameters: Parameter[];
     data: ComponentData[];
     states: State[];
 }

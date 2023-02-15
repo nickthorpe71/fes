@@ -25,7 +25,7 @@ export const extractComponentDeclaration = (
         nodeType: "component-declaration",
         isGlobal: extractComponentGlobalStatus(componentSignature),
         name: extractComponentName(componentSignature),
-        arguments: extractParameters(componentSignature),
+        parameters: extractParameters(componentSignature),
         states: extractStates(roughNode.children),
         data: extractComponentData(roughNode.children),
     };

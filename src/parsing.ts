@@ -101,9 +101,14 @@ export const generateFilesFromFesAST = (
         content: "",
     }));
 
-    const filesWithImports: File[] = appendNewLines(
-        files,
-        gatherImports(files)
+    const importLineMap = gatherImports(files);
+    // can potentially just append all lines to all files at the end
+    const filesWithImports: File[] = appendNewLines(files, importLineMap);
+
+    const propTypeLineMap = gatherPropTypes(fesAST);
+    const filesWithPropTypes = appendNewLines(
+        filesWithImports,
+        propTypeLineMap
     );
 
     //  - determine the props type interface and any other interfaces it needs
@@ -116,7 +121,7 @@ export const generateFilesFromFesAST = (
     //      - add jsx for specifies states (error, loading, etc.)
     //  - component export default
 
-    return filesWithImports;
+    return filesWithPropTypes;
 };
 
 const appendNewLines = (files: File[], newLineMap: NewLineMap): File[] => {
@@ -133,6 +138,21 @@ const gatherImports = (files: File[]): NewLineMap => {
 
     return files.reduce((acc, file) => {
         acc[file.name] = [defaultImports];
+        return acc;
+    }, {} as NewLineMap);
+};
+
+const gatherPropTypes = (fesAST: ComponentDeclaration[]): NewLineMap => {
+    return fesAST.reduce((acc, node) => {
+        acc[node.name + ".tsx"] = !node.parameters.length
+            ? []
+            : [
+                  `\rinterface ${node.name}Props {`,
+                  ...node.parameters.map(
+                      (param) => `  ${param.name}: ${param.type};`
+                  ),
+                  "}\r",
+              ];
         return acc;
     }, {} as NewLineMap);
 };
