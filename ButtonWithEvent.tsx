@@ -1,1 +1,0 @@
-import React, { FC, useState, useRef, useEffect } from 'react';const ButtonWithEvent: FC<ButtonWithEventProps> = ({  }) => {};export default ButtonWithEvent;

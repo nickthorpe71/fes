@@ -24,7 +24,7 @@ export const composeComponentDeclaration = (
     return {
         nodeType: "component-declaration",
         isGlobal: extractComponentGlobalStatus(componentSignature),
-        name: extractComponentName(componentSignature),
+        name: extractComponentDeclarationName(componentSignature),
         parameters: extractParameters(componentSignature),
         states: composeStates(roughNode.children),
         data: composeComponentData(roughNode.children),
@@ -38,7 +38,7 @@ export const composeComponentReference = (
 
     return {
         nodeType: "component-reference",
-        name: extractComponentName(componentSignature),
+        name: extractComponentReferenceName(componentSignature),
         arguments: extractArguments(componentSignature),
     };
 };
@@ -47,8 +47,13 @@ export const extractComponentGlobalStatus = (
     componentSignature: string
 ): boolean => componentSignature.startsWith("[r]");
 
-export const extractComponentName = (componentSignature: string): string =>
-    componentSignature.slice(3).split("(")[0];
+export const extractComponentDeclarationName = (
+    componentSignature: string
+): string => componentSignature.slice(3).split("(")[0];
+
+export const extractComponentReferenceName = (
+    componentSignature: string
+): string => componentSignature.slice(2).split("(")[0];
 
 export const composeStates = (potentialStates: RoughNode[]): State[] => {
     const states = potentialStates.filter((node) =>

@@ -1,1 +1,0 @@
-import React, { FC, useState, useRef, useEffect } from 'react';interface Button1Props {    text: string;    onClick?: () => void;}const Button1: FC<Button1Props> = ({ text, onClick }) => {};export default Button1;

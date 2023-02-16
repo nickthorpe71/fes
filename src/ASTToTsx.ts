@@ -1,4 +1,11 @@
-import { ComponentDeclaration, File, NewLineMap } from "./types";
+import {
+    ComponentDeclaration,
+    ComponentReference,
+    RawComponent,
+    State,
+    File,
+    NewLineMap,
+} from "./types";
 
 export const generateFilesFromFesAST = (
     fesAST: ComponentDeclaration[]
@@ -8,7 +15,7 @@ export const generateFilesFromFesAST = (
         content: "",
     }));
 
-    const importLineMap = gatherImports(files);
+    const importLineMap = gatherImports(files, fesAST);
     // can potentially just append all lines to all files at the end
     const filesWithImports: File[] = appendNewLines(files, importLineMap);
 
@@ -24,20 +31,18 @@ export const generateFilesFromFesAST = (
         componentFunctions
     );
 
-    const componentEndings = gatherComponentEndings(fesAST);
-    const filesWithComponentEndings = appendNewLines(
-        filesWithComponentFunctions,
-        componentEndings
-    );
-
-    //  - determine the component function signature
     //  - determine the component function body
     //    - determine states
     //      - all specified states (error, loading, etc.)
     //  - component function return
     //    - construct jsx
     //      - add jsx for specifies states (error, loading, etc.)
-    //  - component export default
+
+    const componentEndings = gatherComponentEndings(fesAST);
+    const filesWithComponentEndings = appendNewLines(
+        filesWithComponentFunctions,
+        componentEndings
+    );
 
     return filesWithComponentEndings;
 };
@@ -50,14 +55,57 @@ const appendNewLines = (files: File[], newLineMap: NewLineMap): File[] => {
     }));
 };
 
-const gatherImports = (files: File[]): NewLineMap => {
+const gatherImports = (
+    files: File[],
+    fesAST: ComponentDeclaration[]
+): NewLineMap => {
     const defaultImports =
         "import React, { FC, useState, useRef, useEffect } from 'react';";
 
     return files.reduce((acc, file) => {
-        acc[file.name] = [defaultImports];
+        const importedComponents: string[] = gatherImportedComponentsNames(
+            file.name.replace(".tsx", ""),
+            fesAST
+        );
+
+        acc[file.name] = [
+            defaultImports,
+            "",
+            ...importedComponents.map(
+                (name) => `import ${name} from './${name}';`
+            ),
+        ];
         return acc;
     }, {} as NewLineMap);
+};
+
+const gatherImportedComponentsNames = (
+    parentComponentName: string,
+    fesAST: ComponentDeclaration[]
+): string[] => {
+    const parentComponent: ComponentDeclaration | undefined = fesAST.find(
+        (node) => node.name === parentComponentName
+    );
+    if (!parentComponent) return [];
+    return parentComponent.states.reduce((acc: string[], state: State) => {
+        const importedComponents = state.children.reduce(
+            (
+                acc: string[],
+                child: ComponentDeclaration | ComponentReference | RawComponent
+            ) => {
+                if (
+                    child.nodeType === "component-reference" &&
+                    !acc.includes(child.name)
+                )
+                    acc.push(child.name);
+                return acc;
+            },
+            [] as string[]
+        );
+
+        // remove duplicates
+        return [...new Set([...acc, ...importedComponents])];
+    }, [] as string[]);
 };
 
 const gatherPropTypes = (fesAST: ComponentDeclaration[]): NewLineMap => {

@@ -1,11 +1,4 @@
-import {
-    Parameter,
-    RoughNode,
-    ComponentDeclaration,
-    File,
-    NewLineMap,
-} from "./types";
-
+import { Parameter, RoughNode, ComponentDeclaration } from "./types";
 import { composeComponentDeclaration } from "./component";
 
 export const extractParameters = (text: string): Parameter[] => {

@@ -12,10 +12,10 @@
 
 [s]ButtonWithEvent()
     ::default
-        @@button1("hover me")
+        @@Button1("hover me")
         ->onMouseOver = @@self::hover
     ::hover
-        @@button1("hovering", () => throw("error"))
+        @@Button1("hovering", () => throw("error"))
         ->onMouseLeave = @@self::default
     ::error
         style: "text-red-400"

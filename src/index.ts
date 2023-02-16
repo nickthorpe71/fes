@@ -7,22 +7,35 @@ import { RoughNode, ComponentDeclaration, File } from "./types";
 import { extractRoughTree, composeFesAST } from "./fesToAST";
 import { generateFilesFromFesAST } from "./ASTToTsx";
 
-const main = () => {
-    const source = "button.fes";
+const main = (source: string) => {
+    fs.readFile(
+        source,
+        "utf-8",
+        (err: NodeJS.ErrnoException | null, data: string) => {
+            if (err) throw err;
 
-    fs.readFile(source, "utf-8", (err, data) => {
-        if (err) throw err;
+            // parse fes file
+            const roughTree: RoughNode[] = extractRoughTree(data);
+            const fesAST: ComponentDeclaration[] = composeFesAST(roughTree);
 
-        const roughTree: RoughNode[] = extractRoughTree(data);
-        const fesAST: ComponentDeclaration[] = composeFesAST(roughTree);
-        const newFiles: File[] = generateFilesFromFesAST(fesAST);
+            // generate files from fesAST
+            const newFiles: File[] = generateFilesFromFesAST(fesAST);
 
-        newFiles.forEach((file) => {
-            fs.writeFile(file.name, file.content, (err) => {
-                if (err) throw err;
+            // create an output folder
+            if (!fs.existsSync("output")) fs.mkdirSync("output");
+
+            // write newFiles to output folder
+            newFiles.forEach((file: File) => {
+                fs.writeFile(
+                    `./output/${file.name}`,
+                    file.content,
+                    (err: NodeJS.ErrnoException | null) => {
+                        if (err) throw err;
+                    }
+                );
             });
-        });
-    });
+        }
+    );
 };
 
-main();
+main("button.fes");
