@@ -1,12 +1,11 @@
 import * as fs from "fs";
 
+// types
 import { RoughNode, ComponentDeclaration, File } from "./types";
 
-import {
-    extractRoughTree,
-    extractFesAST,
-    generateFilesFromFesAST,
-} from "./parsing";
+// functions
+import { extractRoughTree, composeFesAST } from "./fesToAST";
+import { generateFilesFromFesAST } from "./ASTToTsx";
 
 const main = () => {
     const source = "button.fes";
@@ -15,7 +14,7 @@ const main = () => {
         if (err) throw err;
 
         const roughTree: RoughNode[] = extractRoughTree(data);
-        const fesAST: ComponentDeclaration[] = extractFesAST(roughTree);
+        const fesAST: ComponentDeclaration[] = composeFesAST(roughTree);
         const newFiles: File[] = generateFilesFromFesAST(fesAST);
 
         newFiles.forEach((file) => {

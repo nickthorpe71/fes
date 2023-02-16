@@ -6,7 +6,7 @@ import {
     NewLineMap,
 } from "./types";
 
-import { extractComponentDeclaration } from "./component";
+import { composeComponentDeclaration } from "./component";
 
 export const extractParameters = (text: string): Parameter[] => {
     if (!text.includes("(")) return [];
@@ -84,75 +84,11 @@ export const extractRoughTree = (text: string): RoughNode[] => {
     return tree;
 };
 
-export const extractFesAST = (
+export const composeFesAST = (
     roughTree: RoughNode[]
 ): ComponentDeclaration[] => {
     const fesAST = roughTree.map((node: RoughNode) =>
-        extractComponentDeclaration(node)
+        composeComponentDeclaration(node)
     );
     return fesAST;
-};
-
-export const generateFilesFromFesAST = (
-    fesAST: ComponentDeclaration[]
-): File[] => {
-    const files: File[] = fesAST.map((node: ComponentDeclaration) => ({
-        name: node.name + ".tsx",
-        content: "",
-    }));
-
-    const importLineMap = gatherImports(files);
-    // can potentially just append all lines to all files at the end
-    const filesWithImports: File[] = appendNewLines(files, importLineMap);
-
-    const propTypeLineMap = gatherPropTypes(fesAST);
-    const filesWithPropTypes = appendNewLines(
-        filesWithImports,
-        propTypeLineMap
-    );
-
-    //  - determine the props type interface and any other interfaces it needs
-    //  - determine the component function signature
-    //  - determine the component function body
-    //    - determine states
-    //      - all specified states (error, loading, etc.)
-    //  - component function return
-    //    - construct jsx
-    //      - add jsx for specifies states (error, loading, etc.)
-    //  - component export default
-
-    return filesWithPropTypes;
-};
-
-const appendNewLines = (files: File[], newLineMap: NewLineMap): File[] => {
-    return files.map((file: File) => ({
-        ...file,
-        content: (file.content =
-            file.content + newLineMap[file.name].join("\r") + "\r"),
-    }));
-};
-
-const gatherImports = (files: File[]): NewLineMap => {
-    const defaultImports =
-        "import React, {FC, useState, useRef, useEffect} from 'react';";
-
-    return files.reduce((acc, file) => {
-        acc[file.name] = [defaultImports];
-        return acc;
-    }, {} as NewLineMap);
-};
-
-const gatherPropTypes = (fesAST: ComponentDeclaration[]): NewLineMap => {
-    return fesAST.reduce((acc, node) => {
-        acc[node.name + ".tsx"] = !node.parameters.length
-            ? []
-            : [
-                  `\rinterface ${node.name}Props {`,
-                  ...node.parameters.map(
-                      (param) => `  ${param.name}: ${param.type};`
-                  ),
-                  "}\r",
-              ];
-        return acc;
-    }, {} as NewLineMap);
 };

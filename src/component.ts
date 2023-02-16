@@ -6,17 +6,17 @@ import {
     RoughNode,
 } from "./types";
 
-import { extractArguments, extractParameters } from "./parsing";
+import { extractArguments, extractParameters } from "./fesToAST";
 
 import {
     extractStateName,
     extractStateType,
-    extractStateStyle,
-    extractStateBehaviors,
-    extractStateChildComponents,
+    composeStyle,
+    composeBehaviors,
+    composeStateChildComponents,
 } from "./state";
 
-export const extractComponentDeclaration = (
+export const composeComponentDeclaration = (
     roughNode: RoughNode
 ): ComponentDeclaration => {
     const componentSignature = roughNode.content;
@@ -26,12 +26,12 @@ export const extractComponentDeclaration = (
         isGlobal: extractComponentGlobalStatus(componentSignature),
         name: extractComponentName(componentSignature),
         parameters: extractParameters(componentSignature),
-        states: extractStates(roughNode.children),
-        data: extractComponentData(roughNode.children),
+        states: composeStates(roughNode.children),
+        data: composeComponentData(roughNode.children),
     };
 };
 
-export const extractComponentReference = (
+export const composeComponentReference = (
     roughNode: RoughNode
 ): ComponentReference => {
     const componentSignature = roughNode.content;
@@ -50,7 +50,7 @@ export const extractComponentGlobalStatus = (
 export const extractComponentName = (componentSignature: string): string =>
     componentSignature.slice(3).split("(")[0];
 
-export const extractStates = (potentialStates: RoughNode[]): State[] => {
+export const composeStates = (potentialStates: RoughNode[]): State[] => {
     const states = potentialStates.filter((node) =>
         node.content.startsWith("::")
     );
@@ -63,14 +63,14 @@ export const extractStates = (potentialStates: RoughNode[]): State[] => {
             nodeType: "state",
             type: stateType,
             name: stateName,
-            style: extractStateStyle(state.children),
-            behaviors: extractStateBehaviors(state.children),
-            children: extractStateChildComponents(state.children),
+            style: composeStyle(state.children),
+            behaviors: composeBehaviors(state.children),
+            children: composeStateChildComponents(state.children),
         };
     });
 };
 
-export const extractComponentData = (
+export const composeComponentData = (
     potentialData: RoughNode[]
 ): ComponentData[] => {
     return [];

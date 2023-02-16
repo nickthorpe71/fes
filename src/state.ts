@@ -8,8 +8,8 @@ import {
 } from "./types";
 
 import {
-    extractComponentDeclaration,
-    extractComponentReference,
+    composeComponentDeclaration,
+    composeComponentReference,
 } from "./component";
 
 import { extractBehaviorType, extractBehaviorTarget } from "./behavior";
@@ -28,7 +28,7 @@ export const extractStateType = (stateName: string): State["type"] => {
     return "custom-state";
 };
 
-export const extractStateStyle = (potentialStyles: RoughNode[]): string => {
+export const composeStyle = (potentialStyles: RoughNode[]): string => {
     const styleNode = potentialStyles.find((node) =>
         node.content.startsWith("style:")
     );
@@ -37,7 +37,7 @@ export const extractStateStyle = (potentialStyles: RoughNode[]): string => {
     return !styleNode ? "" : styleNode.content.slice(6).trim();
 };
 
-export const extractStateBehaviors = (
+export const composeBehaviors = (
     potentialBehaviors: RoughNode[]
 ): Behavior[] => {
     const behaviorNodes = potentialBehaviors.filter((node) =>
@@ -55,7 +55,7 @@ export const extractStateBehaviors = (
     });
 };
 
-export const extractStateChildComponents = (
+export const composeStateChildComponents = (
     potentialChildren: RoughNode[]
 ): Array<ComponentDeclaration | ComponentReference | RawComponent> => {
     const declarations = potentialChildren.filter((node) =>
@@ -74,9 +74,9 @@ export const extractStateChildComponents = (
 
     return [
         ...declarations.map((declaration) =>
-            extractComponentDeclaration(declaration)
+            composeComponentDeclaration(declaration)
         ),
-        ...references.map((reference) => extractComponentReference(reference)),
+        ...references.map((reference) => composeComponentReference(reference)),
         ...rawComponents.map((rawComponent) => ({
             nodeType: "raw-component" as const,
             content: rawComponent.content,
