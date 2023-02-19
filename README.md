@@ -1,4 +1,4 @@
-# FAST - Frontend Automated Scaffolding Tool
+# FES - Front End Scaffolding
 
 ### Goals
 
@@ -82,24 +82,3 @@ you can write:
 ```
 prompt: a scss class that centers the elements
 ```
-
-### Development
-
-#### C bindings
-
-in WSL
-
-1. write C file and compile with gcc
-2.
-
-```js
-const { exec } = require("child_process");
-
-exec("./myProgram ./button.fes", (error, stdout, stderr) => myFunction(stdout));
-
-const myFunction = (cProgramOutput) => {
-    console.log("output:", cProgramOutput);
-};
-```
-
-**note:** This is blocking so if it needs to be run async look up const `{ spawn } = require("child_process");`

@@ -31,16 +31,26 @@ export const generateFilesFromFesAST = (
         componentFunctions
     );
 
+    const componentBody = gatherComponentBody(fesAST);
+    const filesWithComponentBody = appendNewLines(
+        filesWithComponentFunctions,
+        componentBody
+    );
+
     //  - determine the component function body
     //    - determine states
+    //    - if component has more than 1 state create an enum for all states
     //      - all specified states (error, loading, etc.)
+    //      - write a reference guide of all built-in states
     //  - component function return
     //    - construct jsx
     //      - add jsx for specifies states (error, loading, etc.)
+    //          - get styles from default state
+    //          - any raw components might have their own styles
 
     const componentEndings = gatherComponentEndings(fesAST);
     const filesWithComponentEndings = appendNewLines(
-        filesWithComponentFunctions,
+        filesWithComponentBody,
         componentEndings
     );
 
@@ -142,6 +152,24 @@ const gatherComponentFunctionSignature = (
 const gatherComponentEndings = (fesAST: ComponentDeclaration[]): NewLineMap => {
     return fesAST.reduce((acc, node) => {
         acc[node.name + ".tsx"] = ["};", "export default " + node.name + ";"];
+        return acc;
+    }, {} as NewLineMap);
+};
+
+const gatherComponentBody = (fesAST: ComponentDeclaration[]): NewLineMap => {
+    // find names of all states
+    const stateNames = fesAST.reduce((acc, node) => {
+        return [...acc, ...node.states.map((state) => state.name)];
+    }, [] as string[]);
+
+    console.log(stateNames);
+
+    return fesAST.reduce((acc, node) => {
+        acc[node.name + ".tsx"] = [
+            ...node.states.map((state) => {
+                return `const [${state.name}, set${state.name}] = useState(${state});`;
+            }),
+        ];
         return acc;
     }, {} as NewLineMap);
 };
