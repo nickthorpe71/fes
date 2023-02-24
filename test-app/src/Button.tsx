@@ -6,14 +6,10 @@ interface ButtonProps {
 }
 
 const Button: FC<ButtonProps> = ({ text, onClick }) => {
-    const [style, setStyle] = React.useState("bg-white text-slate-500");
-
     return (
         <button
-            className={`py-2 px-4 rounded ${style}`}
+            className={`py-2 px-4 rounded bg-white text-slate-500 hover:bg-slate-500 hover:text-white`}
             onClick={onClick}
-            onMouseOver={() => setStyle("bg-slate-500 text-white")}
-            onMouseLeave={() => setStyle("bg-white text-slate-500")}
         >
             {text}
         </button>

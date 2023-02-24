@@ -1,40 +1,39 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useRef, useEffect } from "react";
 import Button1 from "./Button1";
 
-enum states {
-    DEFAULT,
-    HOVER,
-    ERROR,
-}
-
 const ButtonWithEvent = () => {
-    const [state, setState] = useState(states.DEFAULT);
+    enum states {
+        DEFAULT,
+        HOVER,
+        ERROR,
+    }
+    const [state, setState] = useState<states>(states.DEFAULT);
+    const isMounted = useRef<boolean>(true);
+    /* prettier-ignore */ useEffect(() => () => { isMounted.current = false; }, [] );
+    const setStateIfRendered = (newState: states) =>
+        isMounted.current ? setState(newState) : null;
 
     const handleHover = () => {
         try {
-            console.log("hovering");
-            setState(states.HOVER);
+            setStateIfRendered(states.HOVER);
         } catch (error) {
-            setState(states.ERROR);
+            setStateIfRendered(states.ERROR);
         }
     };
 
     const handleLeave = () => {
         try {
-            console.log("not hovering");
-            setState(states.DEFAULT);
+            setStateIfRendered(states.DEFAULT);
         } catch (error) {
-            setState(states.ERROR);
+            setStateIfRendered(states.ERROR);
         }
     };
 
     const handleClick = () => {
         try {
-            console.log("clicked");
             throw new Error("error");
         } catch (error) {
-            setState(states.ERROR);
-            console.error("error");
+            setStateIfRendered(states.ERROR);
         }
     };
 

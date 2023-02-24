@@ -7,10 +7,10 @@
 [s]ButtonWithEvent()
     ::default
         @@Button1("hover me")
-        ->onMouseOver = @@self::hover & print("hovering")
+        ->onMouseOver = @@self::hover
     ::hover
         @@Button1("hovering", () => throw("error"))
-        ->onMouseLeave = @@self::default & print("hovering")
+        ->onMouseLeave = @@self::default
     ::error
         style: "text-red-400"
         "This button is broken, please refresh."

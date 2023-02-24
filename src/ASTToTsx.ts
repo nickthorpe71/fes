@@ -42,6 +42,7 @@ export const generateFilesFromFesAST = (
     //    - if component has more than 1 state create an enum for all states
     //      - all specified states (error, loading, etc.)
     //      - write a reference guide of all built-in states
+
     //  - component function return
     //    - construct jsx
     //      - add jsx for specifies states (error, loading, etc.)
@@ -142,9 +143,12 @@ const gatherComponentFunctionSignature = (
             .join(", ")
             .replace("?", "");
 
-        acc[node.name + ".tsx"] = [
-            `const ${node.name}: FC<${node.name}Props> = ({ ${parameters} }) => {`,
-        ];
+        acc[node.name + ".tsx"] =
+            node.parameters.length > 0
+                ? [
+                      `const ${node.name}: FC<${node.name}Props> = ({ ${parameters} }) => {`,
+                  ]
+                : [`const ${node.name}: FC = () => {`];
         return acc;
     }, {} as NewLineMap);
 };
@@ -157,19 +161,23 @@ const gatherComponentEndings = (fesAST: ComponentDeclaration[]): NewLineMap => {
 };
 
 const gatherComponentBody = (fesAST: ComponentDeclaration[]): NewLineMap => {
-    // find names of all states
-    const stateNames = fesAST.reduce((acc, node) => {
-        return [...acc, ...node.states.map((state) => state.name)];
-    }, [] as string[]);
-
-    console.log(stateNames);
-
     return fesAST.reduce((acc, node) => {
-        acc[node.name + ".tsx"] = [
-            ...node.states.map((state) => {
-                return `const [${state.name}, set${state.name}] = useState(${state});`;
-            }),
-        ];
+        acc[node.name + ".tsx"] =
+            node.states.length <= 1
+                ? []
+                : [
+                      `    enum compState {`,
+                      ...node.states.map(
+                          (state) => `        ${state.name.toUpperCase()},`
+                      ),
+                      "    }",
+                      "    ",
+                      `    const [state, setState] = useState<compState>(compState.${node.states[0].name.toUpperCase()});`,
+                      `    const isMounted = useRef<boolean>(true);`,
+                      `    /* prettier-ignore */ useEffect(() => () => { isMounted.current = false; }, [] );`,
+                      `    const setStateSafe = (newState: compState) => isMounted.current ? setState(newState) : null;`,
+                      `    `,
+                  ];
         return acc;
     }, {} as NewLineMap);
 };
